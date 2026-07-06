@@ -6,7 +6,7 @@
 #   bash ddns.sh <Cloudflare_API_Token> <Domain>
 #
 # Example:
-#   bash ddns.sh cf_xxxxxx awshk.2012021.xyz
+#   bash ddns.sh cf_xxxxxx ddns.example.com
 #
 # This script is idempotent: it can be re-run safely at any time to update
 # the configuration and/or the running container to the latest image.
@@ -74,7 +74,7 @@ Usage:
 bash ddns.sh <Cloudflare_API_Token> <Domain>
 
 Example:
-bash ddns.sh cf_xxxxxx awshk.2012021.xyz
+bash ddns.sh cf_xxxxxx ddns.example.com
 EOF
 }
 
