@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/<GitHub用户名>/ddns/main/ddns.sh
 例如：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/abc/ddns/main/ddns.sh | bash -s -- "cf_xxxxxxxxxxxxxxxxxxx" "awshk.2012021.xyz"
+curl -fsSL https://raw.githubusercontent.com/kkkm0/ddns/main/ddns.sh | bash -s -- "cf_xxxxxxxxxxxxxxxxxxx" "hk.xxxxxx.xyz"
 ```
 
 参数说明：
@@ -98,7 +98,7 @@ docker compose down
 如果需要更换域名或 API Token，只需重新执行同一条安装命令，传入新的参数即可。脚本会自动覆盖旧的 `.env` 配置，并重建容器，无需手动清理。
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<GitHub用户名>/ddns/main/ddns.sh | bash -s -- "新的Token" "新的域名"
+curl -fsSL https://raw.githubusercontent.com/kkkm0/ddns/main/ddns.sh | bash -s -- "新的Token" "新的域名"
 ```
 
 ## 安全说明
