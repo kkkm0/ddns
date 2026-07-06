@@ -71,10 +71,11 @@ die() {
 print_usage() {
     cat <<'EOF'
 Usage:
-bash ddns.sh <Cloudflare_API_Token> <Domain>
+bash ddns.sh <Cloudflare_API_Token> <Domain> [ipv6]
 
 Example:
 bash ddns.sh cf_xxxxxx ddns.example.com
+bash ddns.sh cf_xxxxxx ddns.example.com ipv6
 EOF
 }
 
@@ -82,7 +83,7 @@ EOF
 # Step 0: Argument validation
 # --------------------------------------------------------------------------
 validate_args() {
-    if [[ "$#" -ne 2 ]]; then
+    if [[ "$#" -lt 2 || "$#" -gt 3 ]]; then
         print_usage
         exit 1
     fi
@@ -93,6 +94,17 @@ validate_args() {
     if [[ -z "${CF_API_TOKEN}" || -z "${DDNS_DOMAIN}" ]]; then
         print_usage
         exit 1
+    fi
+
+    # Optional third argument: pass "ipv6" to also let favonia/cloudflare-ddns
+    # manage IPv6 records. By default IPv6 is disabled, since most VPS hosts
+    # only have an IPv4 address, and leaving IPv6 detection enabled produces
+    # noisy/harmless "No valid IPv6 addresses were detected" log spam.
+    ENABLE_IPV6=false
+    if [[ "${3:-}" == "ipv6" ]]; then
+        ENABLE_IPV6=true
+    elif [[ -n "${3:-}" ]]; then
+        die "Unknown third argument: '${3}'. The only supported value is 'ipv6'."
     fi
 }
 
@@ -214,6 +226,14 @@ CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
 DOMAINS=${DDNS_DOMAIN}
 EOF
 
+    # By default, disable IPv6 management. Most VPS hosts only have an IPv4
+    # address, so leaving IPv6 detection enabled just produces harmless but
+    # noisy "No valid IPv6 addresses were detected" log spam. Users who pass
+    # the optional "ipv6" argument opt in to IPv6 management instead.
+    if [[ "${ENABLE_IPV6}" != "true" ]]; then
+        echo "IP6_PROVIDER=none" >> "${ENV_FILE}"
+    fi
+
     # Restrict permissions since this file contains a sensitive API token.
     chmod 600 "${ENV_FILE}" || log_warning "Could not set permissions on ${ENV_FILE}."
 
@@ -266,6 +286,12 @@ print_summary() {
     echo
     echo "Domain:"
     echo "${DDNS_DOMAIN}"
+    echo
+    if [[ "${ENABLE_IPV6}" == "true" ]]; then
+        echo "IPv6 Management: enabled"
+    else
+        echo "IPv6 Management: disabled (IP6_PROVIDER=none)"
+    fi
     echo
     echo "Install Path:"
     echo "${INSTALL_DIR}"
