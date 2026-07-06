@@ -7,23 +7,41 @@
 ## 使用方式
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<GitHub用户名>/ddns/main/ddns.sh | bash -s -- "你的Token" "你的域名"
+curl -fsSL https://raw.githubusercontent.com/<GitHub用户名>/ddns/main/ddns.sh | bash -s -- "你的Token" "你的域名" [ipv6]
 ```
 
 例如：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kkkm0/ddns/main/ddns.sh | bash -s -- "cf_xxxxxxxxxxxxxxxxxxx" "hk.xxxxxx.xyz"
+# 默认：只管理 IPv4（推荐，适用于绝大多数只有 IPv4 的 VPS）
+curl -fsSL https://raw.githubusercontent.com/abc/ddns/main/ddns.sh | bash -s -- "cf_xxxxxxxxxxxxxxxxxxx" "ddns.example.com"
+
+# 同时管理 IPv4 和 IPv6
+curl -fsSL https://raw.githubusercontent.com/abc/ddns/main/ddns.sh | bash -s -- "cf_xxxxxxxxxxxxxxxxxxx" "ddns.example.com" ipv6
 ```
 
 参数说明：
 
-| 参数序号 | 含义 | 示例 |
-| --- | --- | --- |
-| 1 | Cloudflare API Token | `cf_xxxxxxxxxxxxxxxxxxx` |
-| 2 | 需要更新的完整域名 | `awshk.2012021.xyz` |
+| 参数序号 | 含义 | 是否必填 | 示例 |
+| --- | --- | --- | --- |
+| 1 | Cloudflare API Token | 必填 | `cf_xxxxxxxxxxxxxxxxxxx` |
+| 2 | 需要更新的完整域名 | 必填 | `ddns.example.com` |
+| 3 | 是否启用 IPv6 管理，传入 `ipv6` 表示启用 | 可选 | `ipv6` |
 
 > ⚠️ 脚本需要以 **root** 身份运行（或通过 `sudo bash ddns.sh ...` 方式手动执行）。
+
+### 关于 IPv6
+
+绝大多数 VPS 只有 IPv4 地址。`favonia/cloudflare-ddns` 镜像默认会同时尝试探测 IPv4 和 IPv6，在纯 IPv4 环境下会持续输出类似下面的无意义日志：
+
+```text
+Failed to send HTTP(S) request to https://api.cloudflare.com/cdn-cgi/trace
+No valid IPv6 addresses were detected
+```
+
+因此本脚本**默认关闭 IPv6 探测**（自动在 `.env` 中写入 `IP6_PROVIDER=none`），只专注管理 IPv4 记录，避免上述日志噪音。
+
+如果你的 VPS 确实拥有 IPv6 地址，并且希望同时维护 IPv6 DNS 记录，只需在命令末尾追加 `ipv6` 参数即可启用。
 
 ## 功能特性
 
@@ -61,7 +79,10 @@ curl -fsSL https://raw.githubusercontent.com/kkkm0/ddns/main/ddns.sh | bash -s -
 ```env
 CLOUDFLARE_API_TOKEN=<你的Token>
 DOMAINS=<你的域名>
+IP6_PROVIDER=none
 ```
+
+> 说明：`IP6_PROVIDER=none` 仅在**未传入 `ipv6` 参数**时才会写入（默认关闭 IPv6 探测）。若执行时追加了 `ipv6` 参数，则不会写入该行，`favonia/cloudflare-ddns` 会同时管理 IPv4 与 IPv6。
 
 `docker-compose.yml` 内容示例：
 
@@ -98,7 +119,7 @@ docker compose down
 如果需要更换域名或 API Token，只需重新执行同一条安装命令，传入新的参数即可。脚本会自动覆盖旧的 `.env` 配置，并重建容器，无需手动清理。
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kkkm0/ddns/main/ddns.sh | bash -s -- "新的Token" "新的域名"
+curl -fsSL https://raw.githubusercontent.com/<GitHub用户名>/ddns/main/ddns.sh | bash -s -- "新的Token" "新的域名"
 ```
 
 ## 安全说明
