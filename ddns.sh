@@ -224,6 +224,7 @@ write_env_file() {
     cat > "${ENV_FILE}" <<EOF
 CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
 DOMAINS=${DDNS_DOMAIN}
+UPDATE_INTERVAL=120
 EOF
 
     # By default, disable IPv6 management. Most VPS hosts only have an IPv4
