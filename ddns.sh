@@ -3,7 +3,7 @@
 # ddns.sh - One-click installer for Cloudflare DDNS (favonia/cloudflare-ddns)
 #
 # Usage:
-#   sudo bash ddns.sh <Domain> [ipv6]   # prompts for the API token
+#   bash ddns.sh <Cloudflare_API_Token> <Domain> [ipv6]
 #
 # This script is idempotent: it can be re-run safely at any time to update
 # the configuration and/or the running container to the latest image.
@@ -72,8 +72,8 @@ die() {
 print_usage() {
     cat <<'EOF'
 Usage:
-sudo bash ddns.sh <Domain> [ipv6]  # prompts for the API token without echo
-sudo bash ddns.sh <Cloudflare_API_Token> <Domain> [ipv6]  # legacy, visible in argv
+bash ddns.sh <Cloudflare_API_Token> <Domain> [ipv6]
+bash ddns.sh <Domain> [ipv6]  # optional hidden token prompt
 EOF
 }
 
@@ -119,7 +119,7 @@ validate_args() {
     fi
 
     if [[ $# == 3 || ( $# == 2 && "$2" != ipv6 ) ]]; then
-        log_warning "A token passed as an argument can be visible in process listings. Use the hidden prompt instead."
+        log_warning "A token passed as an argument can be visible in process listings."
     else
         token=$(prompt_for_token) || die "Could not read the API token from the terminal."
     fi
@@ -133,7 +133,7 @@ validate_args() {
 # --------------------------------------------------------------------------
 check_root() {
     if [[ "${EUID}" -ne 0 ]]; then
-        die "This script must be run as root. Try: sudo bash ddns.sh <Domain>"
+        die "This script must be run as root. Try: sudo bash ddns.sh <Cloudflare_API_Token> <Domain>"
     fi
 }
 
